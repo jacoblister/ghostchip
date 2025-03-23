@@ -1,5 +1,5 @@
-`ifndef HVSYNC_GENERATOR_H
-`define HVSYNC_GENERATOR_H
+`ifndef HVSYNC
+`define HVSYNC
 
 /*
 Video sync generator, used to drive a simulated CRT.
