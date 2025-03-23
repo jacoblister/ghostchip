@@ -1,6 +1,6 @@
 //`ifdef STUDIO
 
-`include "hvsync_generator.v"
+`include "hvsync.v"
 `include "rom.v"
 `include "ram.v"
 `include "vram.v"
