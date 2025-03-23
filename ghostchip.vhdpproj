@@ -1,0 +1,8 @@
+﻿<Project>
+  <ItemGroup>
+    <File Include="ghostchip.v" />
+  </ItemGroup>
+  <PropertyGroup>
+    <HardwareStartPath>ghostchip.v</HardwareStartPath>
+  </PropertyGroup>
+</Project>
