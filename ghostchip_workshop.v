@@ -1,4 +1,4 @@
-`ifdef STUDIO
+//`ifdef STUDIO
 
 `include "hvsync_generator.v"
 `include "rom.v"
@@ -62,7 +62,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
     rom[2046] = 8'h48;
     rom[2047] = 8'h8C;
     
-//    $readmemh("vramdump.hex", rom);
+    $readmemh("cubes.hex", rom);
   end
   always @(posedge clk) begin
     rom_dout <= rom[rom_short];
@@ -131,4 +131,4 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
                 display_on && vdrive_pixel[0]};
 endmodule
 
-`endif
+//`endif
