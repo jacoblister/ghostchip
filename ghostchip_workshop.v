@@ -5,7 +5,7 @@
 `include "ram.v"
 `include "vram.v"
 `include "cpu.v"
-`include "vdrive_studio.v"
+`include "vdrive_workshop.v"
 
 module ghostchip_workshop(clk, reset, hsync, vsync, 
                     switches_p1, switches_p2,
