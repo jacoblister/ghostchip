@@ -50,7 +50,7 @@ module cpu(
 //        mem_from <= MEM_ROM;
         mem_from_index <= 0;
 //        mem_to <= MEM_RAM;
-        mem_to_index <= 0; //13'h0200;
+        mem_to_index <= 0; //12'h0200;
         mem_count <= 2048;
         mem_delay_cycle <= 1;
         mem_is_fetch <= 0;
@@ -60,7 +60,7 @@ module cpu(
       CPU_MEMORY: begin
         if (mem_delay_cycle)
         begin
-          mem_from_index <= mem_to_index + 1;
+          mem_from_index <= mem_from_index + 1;
           mem_delay_cycle <= 0;
         end
         else
