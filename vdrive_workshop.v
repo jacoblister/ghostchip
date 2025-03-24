@@ -1,4 +1,4 @@
-module vdrive_studio(
+module vdrive_workshop(
   input [8:0] hvsync_hpos,
   input [8:0] hvsync_vpos,
   output [1:0] hvsync_pixel,
