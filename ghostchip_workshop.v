@@ -1,4 +1,4 @@
-//`ifdef STUDIO
+`ifdef __8BITWORKSHOP__
 
 `include "hvsync.v"
 `include "rom.v"
@@ -131,4 +131,4 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
                 display_on && vdrive_pixel[0]};
 endmodule
 
-//`endif
+`endif

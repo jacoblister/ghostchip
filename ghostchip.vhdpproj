@@ -4,13 +4,13 @@
     <File Include="cubes.hex" />
     <File Include="ghostchip.v" />
     <File Include="ghostchip_workshop.v" />
-    <File Include="hwsync_generator.v" />
+    <File Include="hvsync.v" />
     <File Include="keypad.v" />
     <File Include="ram.v" />
     <File Include="rom.v" />
     <File Include="vdrive_1309.v" />
     <File Include="vdrive_1309_tb.v" />
-    <File Include="vdrive_studio.v" />
+    <File Include="vdrive_workshop.v" />
     <File Include="vram.v" />
   </ItemGroup>
   <PropertyGroup>
