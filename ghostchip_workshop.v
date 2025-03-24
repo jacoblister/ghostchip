@@ -117,7 +117,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   );
   
   wire [1:0] vdrive_pixel;
-  vdrive_studio vdrive(
+  vdrive_workshop vdrive(
     .vram_hpos(vram_vdrive_hpos),
     .vram_vpos(vram_vdrive_vpos),
     .vram_pixel(vram_vdrive_pixel),
