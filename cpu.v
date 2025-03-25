@@ -29,8 +29,8 @@ module cpu(
 
   reg [1:0] draw_state = 0;
   reg [12:0] counter = 0;
-  assign vram_hpos = counter[12:6];
-  assign vram_vpos = counter[5:0];
+  assign vram_hpos = counter[6:0];
+  assign vram_vpos = counter[12:7];
   wire [2:0] vram_pixel_index = 7 - {counter[1:0], 1'b0};
   assign vram_pixeli = {ram_dout[vram_pixel_index], ram_dout[vram_pixel_index-1]};
   

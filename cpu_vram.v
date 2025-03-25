@@ -18,8 +18,8 @@ module cpu_vram(
   reg [12:0] counter = 0;
   
 //  assign rom_addr = counter;
-  assign vram_hpos = counter[12:6];
-  assign vram_vpos = counter[5:0];
+  assign vram_hpos = counter[6:0];
+  assign vram_vpos = counter[12:7];
 //  assign vram_pixeli = counter < 4096 ? (counter < 2048 ? 0 : 1) : (counter < 6144 ? 2 : 3);  
 //  assign vram_pixeli = (counter == 0 || counter == 126) ? 3 : 2;
   wire [2:0] vram_pixel_index = 7 - {counter[1:0], 1'b0};

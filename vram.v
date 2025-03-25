@@ -18,9 +18,9 @@ module vram(
   always @(posedge clk) 
   begin
     if (we)
-      ram[{hpos, vpos}] <= pixeli;
+      ram[{vpos, hpos}] <= pixeli;
     
-    vram_pixel_value <= ram[{hpos, vpos}];
+    vram_pixel_value <= ram[{vpos, hpos}];
   end    
   assign pixelo = vram_pixel_value;
   
