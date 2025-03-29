@@ -62,7 +62,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
     rom[2046] = 8'h48;
     rom[2047] = 8'h8C;
     
-    $readmemh("cubes.hex", rom);
+    $readmemh("IBMLogo.hex", rom);
   end
   always @(posedge clk) begin
     rom_dout <= rom[rom_short];
