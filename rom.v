@@ -36,6 +36,7 @@ module rom(
     mem[2046] = 8'h48;
     mem[2047] = 8'h8C;
 //    $readmemh("pokemon.hex", mem);
-    $readmemh("cubes.hex", mem);
+//    $readmemh("cubes.hex", mem);
+    $readmemh("IBMLogo.hex", mem);
   end  
 endmodule
