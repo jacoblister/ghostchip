@@ -41,7 +41,6 @@ module cpu(
   reg mem_delay_cycle = 0;
   reg mem_is_fetch = 0;
 
-  reg [1:0] draw_state = 0;
   reg [6:0] draw_x = 0;
   reg [5:0] draw_y = 0;
   reg [3:0] draw_rx = 0;
@@ -112,7 +111,10 @@ module cpu(
             mem_count <= mem_count - 1;
           end
           else
-            state <= mem_is_fetch ? CPU_EXEC : CPU_FETCH;
+            state <= 
+              mem_is_fetch ? CPU_EXEC : 
+              mem_from == MEM_ROM ? CPU_CLEAR :
+              CPU_FETCH;
       end
       CPU_FETCH: begin
         mem_from <= MEM_RAM;
