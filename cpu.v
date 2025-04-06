@@ -70,15 +70,6 @@ module cpu(
     0;
   assign ram_din = data;
   assign ram_we = mem_to == MEM_RAM;
-  always @(posedge clk)
-  begin
-    if (mem_to == MEM_IR && mem_to_index == 0) 
-      reg_ir[15:8] <= data;
-    if (mem_to == MEM_IR && mem_to_index == 1) 
-      reg_ir[7:0] <= data;
-    if (mem_to == MEM_REG)
-      reg_vr[mem_to_index[3:0]] <= data;
-  end
   
   always @(posedge clk)
   begin
@@ -98,6 +89,13 @@ module cpu(
         state <= CPU_MEMORY;
       end
       CPU_MEMORY: begin
+        if (mem_to == MEM_IR && mem_to_index == 0) 
+          reg_ir[15:8] <= data;
+        if (mem_to == MEM_IR && mem_to_index == 1) 
+          reg_ir[7:0] <= data;
+        if (mem_to == MEM_REG)
+          reg_vr[mem_to_index[3:0]] <= data;
+        
         if (mem_delay_cycle)
         begin
           mem_from_index <= mem_from_index + 1;
@@ -201,6 +199,12 @@ module cpu(
           begin
           reg_vr[4'hf] <= reg_vr[reg_ir[11:8]][7] ? 8'h01 : 8'h00;
           reg_vr[reg_ir[11:8]] <= reg_vr[reg_ir[11:8]] << 1;
+          state <= CPU_FETCH;
+          end
+        else if (reg_ir[15:12] == 4'h9)
+          begin
+            if (reg_vr[reg_ir[11:8]] != reg_vr[reg_ir[7:4]])
+            reg_pc <= reg_pc + 2;
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'hA)
