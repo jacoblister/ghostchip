@@ -204,32 +204,32 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'h8 && reg_ir[3:0] == 4'h4)
           begin
-          reg_vr[4'hf] <= reg_vr[reg_ir[11:8]] + reg_vr[reg_ir[7:4]] > 255 ? 8'h01 : 8'h00;
           reg_vr[reg_ir[11:8]] <= reg_vr[reg_ir[11:8]] + reg_vr[reg_ir[7:4]];
+          reg_vr[4'hf] <= reg_vr[reg_ir[11:8]] + reg_vr[reg_ir[7:4]] > 255 ? 8'h01 : 8'h00;
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'h8 && reg_ir[3:0] == 4'h5)
           begin
-          reg_vr[4'hf] <= reg_vr[reg_ir[11:8]] < reg_vr[reg_ir[7:4]] ? 8'h00 : 8'h01;
           reg_vr[reg_ir[11:8]] <= reg_vr[reg_ir[11:8]] - reg_vr[reg_ir[7:4]];
+          reg_vr[4'hf] <= reg_vr[reg_ir[11:8]] < reg_vr[reg_ir[7:4]] ? 8'h00 : 8'h01;
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'h8 && reg_ir[3:0] == 4'h6)
           begin
-          reg_vr[4'hf] <= reg_vr[reg_ir[11:8]][0] ? 8'h01 : 8'h00;
           reg_vr[reg_ir[11:8]] <= reg_vr[reg_ir[11:8]] >> 1;
+          reg_vr[4'hf] <= reg_vr[reg_ir[11:8]][0] ? 8'h01 : 8'h00;
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'h8 && reg_ir[3:0] == 4'h7)
           begin
-          reg_vr[4'hf] <= reg_vr[reg_ir[11:8]] > reg_vr[reg_ir[7:4]] ? 8'h00 : 8'h01;
           reg_vr[reg_ir[11:8]] <= reg_vr[reg_ir[7:4]] - reg_vr[reg_ir[11:8]];
+          reg_vr[4'hf] <= reg_vr[reg_ir[11:8]] > reg_vr[reg_ir[7:4]] ? 8'h00 : 8'h01;
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'h8 && reg_ir[3:0] == 4'hE)
           begin
-          reg_vr[4'hf] <= reg_vr[reg_ir[11:8]][7] ? 8'h01 : 8'h00;
           reg_vr[reg_ir[11:8]] <= reg_vr[reg_ir[11:8]] << 1;
+          reg_vr[4'hf] <= reg_vr[reg_ir[11:8]][7] ? 8'h01 : 8'h00;
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'h9)
@@ -255,10 +255,11 @@ module cpu(
           mem_delay_cycle <= 1;
           state <= CPU_DRAW;
           end
-//        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h1E)
-//          begin
-//          state <= CPU_FETCH;
-//          end
+        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h1E)
+          begin
+          reg_i <= reg_i + {4'h00, reg_vr[reg_ir[11:8]]};
+          state <= CPU_FETCH;
+          end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h29)
           begin
           // set hex
@@ -277,7 +278,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h55)
           begin
-          mem_count <= {8'h00, reg_ir[11:8]} + 1;
+          mem_count <= {8'h00, reg_ir[11:8]};
           mem_from <= MEM_REG;
           mem_from_index <= 0;
           mem_to <= MEM_RAM;
@@ -288,7 +289,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h65)
           begin
-          mem_count <= {8'h00, reg_ir[11:8]} + 1;
+          mem_count <= {8'h00, reg_ir[11:8]};
           mem_from <= MEM_RAM;
           mem_from_index <= reg_i;
           mem_to <= MEM_REG;
