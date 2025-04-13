@@ -6,6 +6,7 @@
 `include "vram.v"
 `include "cpu.v"
 `include "vdrive_workshop.v"
+`include "matrix_workshop.v"
 
 module ghostchip_workshop(clk, reset, hsync, vsync, 
                     switches_p1, switches_p2,
@@ -17,24 +18,28 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   output hsync, vsync;
   output [2:0] rgb;
   wire display_on;
-
   wire [8:0] hpos;
   wire [8:0] vpos;
+  wire hvsync_vsync;
   
   hvsync_generator hvsync_gen(
     .clk(clk),
     .reset(reset),
     .hsync(hsync),
-    .vsync(vsync),
+    .vsync(hvsync_vsync),
     .display_on(display_on),
     .hpos(hpos),
     .vpos(vpos)
   );
+  assign vsync = hvsync_vsync;
   
   wire [15:0] keypad_matrix;
-  assign keypad_matrix[15:0] = 0;
-//  wire p1gfx = switches_p1[vpos[7:5]]; 
-//  wire p2gfx = switches_p2[vpos[7:5]];
+  matrix_workshop matrix_workshop(
+    .clk(clk),
+    .switches_p1(switches_p1),
+    .switches_p2(switches_p2),
+    .matrix(keypad_matrix)
+  );
   
   wire [11:0] rom_addr;
   wire [7:0] rom_dout;
@@ -62,7 +67,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
     rom[2046] = 8'h48;
     rom[2047] = 8'h8C;
     
-    $readmemh("IBMLogo.hex", rom);
+    $readmemh("keypad.hex", rom);
   end
   always @(posedge clk) begin
     rom_dout <= rom[rom_short];
@@ -102,6 +107,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   
   cpu cpu(
     .clk(clk),
+    .vsync(hvsync_vsync),
     .keypad_matrix(keypad_matrix),
     .rom_addr(rom_addr),
     .rom_dout(rom_dout),

@@ -1,5 +1,6 @@
 module cpu(
   input clk,
+  input vsync,
   input [15:0] keypad_matrix,
   output [11:0] rom_addr,
   input [7:0] rom_dout,
@@ -34,6 +35,7 @@ module cpu(
   reg [11:0] reg_stack [8];
   reg [2:0] reg_sp;
   reg [15:0] reg_ir;
+  reg [7:0] reg_dt;
     
   reg [3:0] state = CPU_INIT;
   reg [2:0] mem_from;
@@ -79,6 +81,10 @@ module cpu(
   
   always @(posedge clk)
   begin
+//    if (vsync)
+      if (reg_dt > 0)
+        reg_dt <= reg_dt - 1;
+    
     case (state)
       CPU_INIT: begin
         mem_from <= MEM_ROM;
@@ -254,6 +260,28 @@ module cpu(
           mem_from_index <= reg_i;
           mem_delay_cycle <= 1;
           state <= CPU_DRAW;
+          end
+        else if (reg_ir[15:12] == 4'hE && reg_ir[7:0] == 8'h9E)
+          begin
+          if (keypad_matrix[reg_vr[reg_ir[11:8]][3:0]])
+            reg_pc <= reg_pc + 2;
+          state <= CPU_FETCH;
+          end
+        else if (reg_ir[15:12] == 4'hE && reg_ir[7:0] == 8'hA1)
+          begin
+          if (!keypad_matrix[reg_vr[reg_ir[11:8]][3:0]])
+            reg_pc <= reg_pc + 2;
+          state <= CPU_FETCH;
+          end
+        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h07)
+          begin
+          reg_vr[reg_ir[11:8]] <= reg_dt;
+          state <= CPU_FETCH;
+          end
+        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h15)
+          begin
+          reg_dt <= reg_vr[reg_ir[11:8]];
+          state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h1E)
           begin
