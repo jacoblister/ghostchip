@@ -1,3 +1,37 @@
+module keyread(
+  input clk,
+  input [15:0] keypad_matrix,
+  output reg trigger,
+  output reg [3:0] index
+  );
+  
+  reg pressed;
+  
+  always @(posedge clk)
+  begin
+    pressed <= keypad_matrix != 0;
+    
+    if (keypad_matrix[0]) index <= 0;
+    if (keypad_matrix[1]) index <= 1;
+    if (keypad_matrix[2]) index <= 2;
+    if (keypad_matrix[3]) index <= 3;
+    if (keypad_matrix[4]) index <= 4;
+    if (keypad_matrix[5]) index <= 5;
+    if (keypad_matrix[6]) index <= 6;
+    if (keypad_matrix[7]) index <= 7;
+    if (keypad_matrix[8]) index <= 8;
+    if (keypad_matrix[9]) index <= 9;
+    if (keypad_matrix[10]) index <= 10;
+    if (keypad_matrix[11]) index <= 11;
+    if (keypad_matrix[12]) index <= 12;
+    if (keypad_matrix[13]) index <= 13;
+    if (keypad_matrix[14]) index <= 14;
+    if (keypad_matrix[15]) index <= 15;
+    
+    trigger <= pressed && keypad_matrix == 0;
+  end  
+endmodule
+
 module cpu(
   input clk,
   input vsync,
@@ -15,13 +49,23 @@ module cpu(
   output vram_we
   );
   
-  parameter CPU_INIT   = 0;
-  parameter CPU_MEMORY = 1;
-  parameter CPU_FETCH  = 2;
-  parameter CPU_EXEC   = 3;
-  parameter CPU_CLEAR  = 4;
-  parameter CPU_DRAW   = 5;
-  parameter CPU_IDLE   = 6;
+  wire keypad_trigger;
+  wire [3:0] keypad_index;
+  keyread keyread(
+    .clk(clk),
+    .keypad_matrix(keypad_matrix),
+    .trigger(keypad_trigger),
+    .index(keypad_index)
+  );
+  
+  parameter CPU_INIT     = 0;
+  parameter CPU_MEMORY   = 1;
+  parameter CPU_FETCH    = 2;
+  parameter CPU_EXEC     = 3;
+  parameter CPU_CLEAR    = 4;
+  parameter CPU_DRAW     = 5;
+  parameter CPU_KEYPRESS = 6;
+  parameter CPU_IDLE     = 7;
   
   parameter MEM_ROM = 0;
   parameter MEM_RAM = 1;
@@ -288,6 +332,10 @@ module cpu(
           reg_vr[reg_ir[11:8]] <= reg_dt;
           state <= CPU_FETCH;
           end
+        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h0A)
+          begin
+          state <= CPU_KEYPRESS;
+          end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h15)
           begin
           reg_dt <= reg_vr[reg_ir[11:8]];
@@ -374,6 +422,13 @@ module cpu(
             end
           end
         end
+      CPU_KEYPRESS: begin
+        if (keypad_trigger)
+          begin
+            reg_vr[reg_ir[11:8]] <= {4'h00, keypad_index};
+            state <= CPU_FETCH;
+          end
+      end
       CPU_IDLE: begin
         draw_x <= ram_dout[6:0];
       end
