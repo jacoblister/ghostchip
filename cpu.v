@@ -54,9 +54,12 @@ module cpu(
   assign vram_hpos = draw_x;
   assign vram_vpos = draw_y;
   
-  assign vram_we = state == CPU_CLEAR || state == CPU_DRAW;
+  assign vram_we = state == CPU_CLEAR || (state == CPU_DRAW && mem_delay_cycle == 0);
   wire[7:0] vram_ram_index = 7 - (draw_x - reg_vr[draw_rx]);
-  assign vram_pixeli = state == CPU_DRAW ? ram_dout[vram_ram_index[2:0]] ? 3 : 0 : 0;
+  assign vram_pixeli = 
+    state == CPU_DRAW ? ram_dout[vram_ram_index[2:0]] ^ vram_pixelo[0] ? 3 : 0 : 
+    state == CPU_CLEAR ? 0 :
+    0;
 
   wire [7:0] data = 
     mem_from == MEM_RAM ? ram_dout : 
@@ -79,9 +82,12 @@ module cpu(
   assign ram_din = data;
   assign ram_we = mem_to == MEM_RAM;
   
+  reg last_vsync;
+  
   always @(posedge clk)
   begin
-//    if (vsync)
+    last_vsync <= vsync;
+    if (vsync && last_vsync != vsync)
       if (reg_dt > 0)
         reg_dt <= reg_dt - 1;
     
@@ -141,7 +147,11 @@ module cpu(
       end
       CPU_EXEC: begin
         if (reg_ir == 16'h00e0)
+          begin
+          draw_x <= 0;
+          draw_y <= 0;
           state <= CPU_CLEAR;
+          end
         else if (reg_ir == 16'h00ee)
           begin
           reg_pc <= reg_stack[reg_sp - 1];
@@ -343,23 +353,26 @@ module cpu(
       end
       CPU_DRAW: begin
         if (mem_delay_cycle)
-        begin
+          begin
           mem_delay_cycle <= 0;
-        end
+          end
         else
+          begin
+          mem_delay_cycle <= 1;
           draw_x <= draw_x + 1;
+
           if (draw_x >= reg_vr[draw_rx][6:0] + 7)
             begin
-              draw_x <= reg_vr[draw_rx][6:0];
-              if (draw_n != 1)
-                draw_y <= draw_y + 1;
+            draw_x <= reg_vr[draw_rx][6:0];
+            draw_y <= draw_y + 1;
+            if (draw_n == 1)
+              state <= CPU_FETCH;
+            else
               draw_n <= draw_n - 1;
 
-              mem_from_index <= mem_from_index + 1;
-              mem_delay_cycle <= 1;
+            mem_from_index <= mem_from_index + 1;
             end
-          if (draw_n == 0)
-            state <= CPU_FETCH;
+          end
         end
       CPU_IDLE: begin
         draw_x <= ram_dout[6:0];
