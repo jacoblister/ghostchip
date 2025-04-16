@@ -35,10 +35,27 @@ module ghostchip (
     assign video_gnd = 0;
     assign video_vcc = 1;
     
+    reg [23:0] divider = 0;
+    reg clk_60hz;
+    always @ (posedge clk) 
+    begin
+      if (divider == 0)
+        begin
+        clk_60hz <= !clk_60hz;
+        divider <= 100000;
+        end
+      else
+        begin
+          divider <= divider - 1'b1;
+        end
+    end
+    wire divclk = clk;
+    
+    
     wire [15:0] keypad_matrix;
 
     keypad keypad(
-        .clk(clk),
+        .clk(clk_60hz),
         .out0(keypad_out0),
         .out1(keypad_out1),
         .out2(keypad_out2),
@@ -108,6 +125,7 @@ module ghostchip (
   
   cpu cpu(
     .clk(clk),
+    .vsync(clk_60hz),
     .keypad_matrix(keypad_matrix),
     .rom_addr(rom_addr),
     .rom_dout(rom_dout),
