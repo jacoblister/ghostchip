@@ -10,7 +10,7 @@
 
 module ghostchip_workshop(clk, reset, hsync, vsync, 
                     switches_p1, switches_p2,
-                    rgb);
+                    rgb, spkr);
 
   input clk, reset;
   input [7:0] switches_p1;
@@ -21,6 +21,10 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   wire [8:0] hpos;
   wire [8:0] vpos;
   wire hvsync_vsync;
+  output spkr;
+  
+  wire beep;
+  assign spkr = hvsync_vsync && beep;
   
   hvsync_generator hvsync_gen(
     .clk(clk),
@@ -67,7 +71,8 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
     rom[2046] = 8'h48;
     rom[2047] = 8'h8C;
     
-    $readmemh("keypad.hex", rom);
+    $readmemh("sound.hex", rom);
+//    $readmemh("keypad.hex", rom);
   end
   always @(posedge clk) begin
     rom_dout <= rom[rom_short];
@@ -108,6 +113,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   cpu cpu(
     .clk(clk),
     .vsync(hvsync_vsync),
+    .beep(beep),
     .keypad_matrix(keypad_matrix),
     .rom_addr(rom_addr),
     .rom_dout(rom_dout),

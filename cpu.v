@@ -35,6 +35,7 @@ endmodule
 module cpu(
   input clk,
   input vsync,
+  output beep,
   input [15:0] keypad_matrix,
   output [11:0] rom_addr,
   input [7:0] rom_dout,
@@ -48,6 +49,8 @@ module cpu(
   input [1:0] vram_pixelo,
   output vram_we
   );
+  
+  assign beep = reg_st != 0;
   
   wire keypad_trigger;
   wire [3:0] keypad_index;
@@ -80,6 +83,7 @@ module cpu(
   reg [2:0] reg_sp;
   reg [15:0] reg_ir;
   reg [7:0] reg_dt;
+  reg [7:0] reg_st;
     
   reg [3:0] state = CPU_INIT;
   reg [2:0] mem_from;
@@ -132,8 +136,12 @@ module cpu(
   begin
     last_vsync <= vsync;
     if (vsync && last_vsync != vsync)
+      begin
       if (reg_dt > 0)
         reg_dt <= reg_dt - 1;
+      if (reg_st > 0)
+        reg_st <= reg_st - 1;
+      end
     
     case (state)
       CPU_INIT: begin
@@ -339,6 +347,11 @@ module cpu(
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h15)
           begin
           reg_dt <= reg_vr[reg_ir[11:8]];
+          state <= CPU_FETCH;
+          end
+        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h18)
+          begin
+          reg_st <= reg_vr[reg_ir[11:8]];
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h1E)

@@ -80,8 +80,11 @@ module ghostchip (
    begin
        speaker_counter <= speaker_counter + 1'b1;
    end
-   assign speaker = !button && speaker_counter[15];
-   assign speaker_inv = !button && !speaker;    
+   wire beep;
+   assign speaker = speaker_counter[15] && beep;
+   assign speaker_inv = 0; //!speaker;    
+//   assign speaker = !button && speaker_counter[15];
+//   assign speaker_inv = !button && !speaker;    
     
   wire [11:0] rom_addr;
   wire [7:0] rom_dout;
@@ -125,6 +128,7 @@ module ghostchip (
   
   cpu cpu(
     .clk(clk),
+    .beep(beep),
     .vsync(clk_60hz),
     .keypad_matrix(keypad_matrix),
     .rom_addr(rom_addr),
