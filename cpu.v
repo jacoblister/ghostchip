@@ -68,7 +68,8 @@ module cpu(
   parameter CPU_CLEAR    = 4;
   parameter CPU_DRAW     = 5;
   parameter CPU_KEYPRESS = 6;
-  parameter CPU_IDLE     = 7;
+  parameter CPU_WAIT     = 7;
+  parameter CPU_IDLE     = 8;
   
   parameter MEM_ROM = 0;
   parameter MEM_RAM = 1;
@@ -84,6 +85,8 @@ module cpu(
   reg [15:0] reg_ir;
   reg [7:0] reg_dt;
   reg [7:0] reg_st;
+  
+  reg [15:0] cpu_limit = 0;
     
   reg [3:0] state = CPU_INIT;
   reg [2:0] mem_from;
@@ -141,6 +144,9 @@ module cpu(
         reg_dt <= reg_dt - 1;
       if (reg_st > 0)
         reg_st <= reg_st - 1;
+      if (state == CPU_WAIT)
+        cpu_limit <= 10;
+        state <= CPU_MEMORY;
       end
     
     case (state)
@@ -193,9 +199,15 @@ module cpu(
         mem_count <= 2;
         mem_is_fetch <= 1;
         mem_delay_cycle <= 1;
-
         reg_pc <= reg_pc + 2;
-        state <= CPU_MEMORY;
+
+        if (cpu_limit == 0)
+          state <= CPU_WAIT;
+        else
+          begin
+          cpu_limit <= cpu_limit - 1;
+          state <= CPU_MEMORY;
+          end;
       end
       CPU_EXEC: begin
         if (reg_ir == 16'h00e0)
@@ -311,6 +323,11 @@ module cpu(
           reg_i <= reg_ir[11:0];
           state <= CPU_FETCH;
           end
+        else if (reg_ir[15:12] == 4'hC)
+          begin
+          reg_vr[reg_ir[11:8]] <= 0;
+          state <= CPU_FETCH;
+          end
         else if (reg_ir[15:12] == 4'hD)
           begin
           draw_rx <= reg_ir[11:8];
@@ -361,7 +378,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h29)
           begin
-          // set hex
+          reg_i <= reg_vr[reg_ir[11:8]] * 5;
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h33)
