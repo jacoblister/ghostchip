@@ -47,31 +47,14 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   
   wire [11:0] rom_addr;
   wire [7:0] rom_dout;
-//  rom rom(
-//    .clk(clk),
-//    .addr(rom_addr),
-//    .dout(rom_dout)
-//  );
   
   reg [7:0] rom [0:2047];
   wire [10:0] rom_short = rom_addr[10:0];
   initial begin
-    integer x;
-    for (x=0; x < 2048; x=x+1)
-      rom[x] = 8'h00;
-
-    rom[0] = 8'hC8;
-    rom[1] = 8'h84;
-    rom[64] = 8'h80;
-    rom[128] = 8'h80;
-    rom[192] = 8'h40;
-    rom[1855] = 8'h04;
-    rom[1919] = 8'h08;
-    rom[1983] = 8'h08;
-    rom[2046] = 8'h48;
-    rom[2047] = 8'h8C;
-    
+    // $readmemh("pong.hex", rom);
     $readmemh("sound.hex", rom);
+//    $readmemh("chip8logo.hex", rom);
+//    $readmemh("flags.hex", rom);
 //    $readmemh("keypad.hex", rom);
   end
   always @(posedge clk) begin

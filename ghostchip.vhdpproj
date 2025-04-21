@@ -1,13 +1,18 @@
 ﻿<Project>
   <ItemGroup>
+    <File Include="IBMLogo.hex" />
     <File Include="cpu.v" />
+    <File Include="cpu_vram.v" />
     <File Include="cubes.hex" />
+    <File Include="font.hex" />
     <File Include="ghostchip.v" />
     <File Include="ghostchip_workshop.v" />
     <File Include="hvsync.v" />
     <File Include="keypad.v" />
+    <File Include="pong.hex" />
     <File Include="ram.v" />
     <File Include="rom.v" />
+    <File Include="sound.hex" />
     <File Include="vdrive_1309.v" />
     <File Include="vdrive_1309_tb.v" />
     <File Include="vdrive_workshop.v" />
