@@ -16,6 +16,6 @@ module rom(
 //   $readmemh("flags.hex", mem);
 //   $readmemh("keypad.hex", mem);
 //   $readmemh("beep.hex", mem);
-   $readmemh("pong.hex", mem);
+   $readmemh("snake.hex", mem);
   end  
 endmodule

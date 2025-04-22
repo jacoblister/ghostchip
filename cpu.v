@@ -28,7 +28,7 @@ module keyread(
     if (keypad_matrix[14]) index <= 14;
     if (keypad_matrix[15]) index <= 15;
     
-    trigger <= pressed && keypad_matrix == 0;
+    trigger <= pressed && (keypad_matrix == 0);
   end  
 endmodule
 
@@ -55,7 +55,7 @@ module cpu(
   wire keypad_trigger;
   wire [3:0] keypad_index;
   keyread keyread(
-    .clk(clk),
+    .clk(vsync),
     .keypad_matrix(keypad_matrix),
     .trigger(keypad_trigger),
     .index(keypad_index)
@@ -330,6 +330,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hD)
           begin
+          reg_vr[4'hf] <= 0;
           draw_rx <= reg_ir[11:8];
           draw_ry <= reg_ir[7:4];
           draw_x <= reg_vr[reg_ir[11:8]][6:0];
@@ -436,6 +437,8 @@ module cpu(
           end
         else
           begin
+          reg_vr[4'hf] <= vram_pixelo[0] && ram_dout[vram_ram_index[2:0]] ? 1 : reg_vr[4'hf];
+
           mem_delay_cycle <= 1;
           draw_x <= draw_x + 1;
 
