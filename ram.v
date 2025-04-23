@@ -41,8 +41,5 @@ module ram(
     font[65] = 8'he0; font[66] = 8'h90; font[67] = 8'h90; font[68] = 8'h90; font[69] = 8'he0;
     font[70] = 8'hf0; font[71] = 8'h80; font[72] = 8'hf0; font[73] = 8'h80; font[74] = 8'hf0;
     font[75] = 8'hf0; font[76] = 8'h80; font[77] = 8'hf0; font[78] = 8'h80; font[79] = 8'h80;
-
-//    $readmemh("font.hex", font);
-//    $readmemh("IBMLogo.hex", font);
   end
 endmodule

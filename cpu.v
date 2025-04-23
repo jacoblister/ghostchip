@@ -28,7 +28,7 @@ module keyread(
     if (keypad_matrix[14]) index <= 14;
     if (keypad_matrix[15]) index <= 15;
     
-    trigger <= pressed && (keypad_matrix == 0);
+    trigger <= pressed && keypad_matrix == 0;
   end  
 endmodule
 
@@ -155,7 +155,7 @@ module cpu(
         mem_from_index <= 0;
         mem_to <= MEM_RAM;
         mem_to_index <= 12'h0200;
-        mem_count <= 2048;
+        mem_count <= 12'h0E00;
         mem_delay_cycle <= 1;
         mem_is_fetch <= 0;
         
