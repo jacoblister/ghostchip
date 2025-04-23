@@ -85,7 +85,8 @@ module cpu(
   reg [15:0] reg_ir;
   reg [7:0] reg_dt;
   reg [7:0] reg_st;
-  
+  reg [7:0] reg_rng;
+    
   reg [15:0] cpu_limit = 0;
     
   reg [3:0] state = CPU_INIT;
@@ -137,6 +138,8 @@ module cpu(
   
   always @(posedge clk)
   begin
+    reg_rng <= reg_rng + 1;
+    
     last_vsync <= vsync;
     if (vsync && last_vsync != vsync)
       begin
@@ -325,7 +328,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hC)
           begin
-          reg_vr[reg_ir[11:8]] <= 0;
+          reg_vr[reg_ir[11:8]] <= reg_rng & reg_ir[7:0];
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'hD)
