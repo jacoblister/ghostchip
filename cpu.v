@@ -36,6 +36,7 @@ module cpu(
   input clk,
   input vsync,
   output beep,
+  output reg hires = 0,
   input [15:0] keypad_matrix,
   output [11:0] rom_addr,
   input [7:0] rom_dout,
@@ -223,6 +224,16 @@ module cpu(
           begin
           reg_pc <= reg_stack[reg_sp - 1];
           reg_sp <= reg_sp - 1;
+          state <= CPU_FETCH;
+          end
+        else if (reg_ir == 16'h00fe)
+          begin
+          hires <= 0;
+          state <= CPU_FETCH;
+          end
+        else if (reg_ir == 16'h00ff)
+          begin
+          hires <= 1;
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'h1)

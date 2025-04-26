@@ -126,9 +126,12 @@ module ghostchip (
     .vdrive_pixel(vram_vdrive_pixel)
   );
   
+  wire hires;
+
   cpu cpu(
     .clk(clk),
     .beep(beep),
+    .hires(hires),
     .vsync(clk_60hz),
     .keypad_matrix(keypad_matrix),
     .rom_addr(rom_addr),
@@ -147,6 +150,7 @@ module ghostchip (
   wire [1:0] vdrive_pixel;
   vdrive vdrive(
     .clk(clk),
+    .hires(hires),
     .vram_hpos(vram_vdrive_hpos),
     .vram_vpos(vram_vdrive_vpos),
     .vram_pixel(vram_vdrive_pixel),

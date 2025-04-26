@@ -20,6 +20,9 @@ module rom(
 //   $readmemh("pong.hex", mem);
 //   $readmemh("snake.hex", mem);
 //   $readmemh("blinky.hex", mem);
-   $readmemh("down8.hex", mem);
+//   $readmemh("down8.hex", mem);
+
+//   $readmemh("rockto.hex", mem);
+   $readmemh("chipcross.hex", mem);
   end  
 endmodule

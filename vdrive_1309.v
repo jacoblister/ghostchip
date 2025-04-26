@@ -1,5 +1,6 @@
 module vdrive (
     input clk, 
+    input hires,
  
     output [6:0] vram_hpos,
     output [5:0] vram_vpos,
@@ -17,8 +18,6 @@ module vdrive (
     begin
         divider <= divider + 1'b1;
     end
-//    assign divclk = divider[23];
-//    assign divclk = divider[21];
     wire divclk = clk;
 
     parameter CMD_INIT = 0;
@@ -33,7 +32,6 @@ module vdrive (
     reg [3:0] cmd_state = CMD_INIT;
 
     reg [23:0] data = 0;
-//    reg [13:0] counter = 0;
     reg [31:0] counter = 0;
     reg [31:0] counter_max = 0;
     
@@ -47,16 +45,11 @@ module vdrive (
 
     reg [1:0] frame = 0;
 
-//    assign vram_hpos = counter[6:0];
-//    assign vram_vpos = counter[12:7];
-    
-//    wire [31:0] counter_n = counter - 1;
-//    assign vram_hpos = counter_n[9:3];
-//    assign vram_vpos = {counter_n[12:10], 3'h7 - counter_n[2:0]};
-
     wire [31:0] counter_n = (8191 - counter) + 1;
-    assign vram_hpos = counter_n[9:3];
-    assign vram_vpos = {counter_n[12:10], 3'h7 - counter_n[2:0]};
+//    assign vram_hpos = counter_n[9:3] / 2;
+//    assign vram_vpos = {counter_n[12:10], 3'h7 - counter_n[2:0]} / 2;
+    assign vram_hpos = counter_n[9:3] / (hires ? 1 : 2);
+    assign vram_vpos = {counter_n[12:10], 3'h7 - counter_n[2:0]} / (hires ? 1 : 2);
 
     wire pixel_0 = 0;
 //    wire pixel_1 = {counter[3], counter[0]} == frame;
@@ -76,7 +69,6 @@ module vdrive (
         (vram_pixel == 3);
     
     assign mosi = drv_state == DRV_CMD ? data[counter] : pixelValue;
-//    assign mosi = drv_state == DRV_CMD ? data[counter] : vram_pixel[0]; //pixelValue;
     assign sclk = (drv_state == DRV_CMD) || (drv_state == DRV_DATA) ? !divclk : 0;
     
     always @ (posedge divclk) 
@@ -130,12 +122,7 @@ module vdrive (
                     cmd_state <= CMD_WAIT;
                     cs <= 1;
                     dc <= 0;
-//                    counter <= 12000000;
-//                    counter <= 112400;
                     counter <= 71800;
-//                    counter_max <= counter_max < 200 ? 200000 : counter_max - 100;
-//                    counter_max <= counter_max < 71600 ? 71800 : counter_max - 1;
-//                    counter <= counter_max;
                 end
                 CMD_WAIT: begin
                     cmd_state <= CMD_FREQ;

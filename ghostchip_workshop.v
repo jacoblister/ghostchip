@@ -24,7 +24,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   output spkr;
   
   wire beep;
-  assign spkr = hvsync_vsync && beep;
+  assign spkr = 0;//hvsync_vsync && beep;
   
   hvsync_generator hvsync_gen(
     .clk(clk),
@@ -51,9 +51,9 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   reg [7:0] rom [0:4095];
   initial begin
 //    $readmemh("pong.hex", rom);
-//    $readmemh("chip8logo.hex", rom);
+    $readmemh("chip8logo.hex", rom);
 //    $readmemh("flags.hex", rom);
-    $readmemh("sound.hex", rom);
+//    $readmemh("sound.hex", rom);
   end
   always @(posedge clk) begin
     rom_dout <= rom[rom_addr];
@@ -91,10 +91,13 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
     .vdrive_pixel(vram_vdrive_pixel)
   );
   
+  wire hires;
+  
   cpu cpu(
     .clk(clk),
     .vsync(hvsync_vsync),
     .beep(beep),
+    .hires(hires),
     .keypad_matrix(keypad_matrix),
     .rom_addr(rom_addr),
     .rom_dout(rom_dout),
@@ -111,6 +114,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   
   wire [1:0] vdrive_pixel;
   vdrive_workshop vdrive(
+    .hires(hires),
     .vram_hpos(vram_vdrive_hpos),
     .vram_vpos(vram_vdrive_vpos),
     .vram_pixel(vram_vdrive_pixel),
