@@ -5,18 +5,18 @@ module matrix_workshop(clk, switches_p1, switches_p2, matrix);
   output [15:0] matrix;
   
   assign matrix[4'h0] = 0;
-  assign matrix[4'h1] = switches_p2[2];
+  assign matrix[4'h1] = 0;
   assign matrix[4'h2] = 0;
   assign matrix[4'h3] = 0;
 
-  assign matrix[4'h4] = switches_p2[3];
-  assign matrix[4'h5] = 0;
+  assign matrix[4'h4] = 0;
+  assign matrix[4'h5] = switches_p2[2];
   assign matrix[4'h6] = 0;
-  assign matrix[4'h7] = 0;
+  assign matrix[4'h7] = switches_p2[0];
 
-  assign matrix[4'h8] = 0;
-  assign matrix[4'h9] = 0;
-  assign matrix[4'hA] = switches_p1[1];
+  assign matrix[4'h8] = switches_p2[3];
+  assign matrix[4'h9] = switches_p2[1];
+  assign matrix[4'hA] = 0;
   assign matrix[4'hB] = 0;
 
   assign matrix[4'hC] = switches_p1[2];
