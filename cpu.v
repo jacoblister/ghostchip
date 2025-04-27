@@ -77,11 +77,13 @@ module cpu(
   parameter MEM_REG = 2;
   parameter MEM_BCD = 3;
   parameter MEM_IR  = 4;
+  parameter MEM_RPL = 5;
   
   reg [11:0] reg_pc;
   reg [11:0] reg_i;
   reg [7:0] reg_vr [16];
   reg [11:0] reg_stack [8];
+  reg [7:0] reg_rpl [8];
   reg [2:0] reg_sp;
   reg [15:0] reg_ir;
   reg [7:0] reg_dt;
@@ -123,6 +125,7 @@ module cpu(
     mem_from == MEM_BCD && mem_from_index == 2 ? (reg_vr[reg_ir[11:8]] % 100) % 10 :
     mem_from == MEM_IR && mem_from_index == 0 ? reg_ir[15:8] :
     mem_from == MEM_IR && mem_from_index == 1 ? reg_ir[7:0] :
+    mem_from == MEM_RPL ? reg_rpl[mem_from_index[2:0]] :
     0;
   assign ram_addr =  
     mem_from == MEM_RAM ? mem_from_index : 
@@ -176,6 +179,8 @@ module cpu(
           reg_ir[7:0] <= data;
         if (mem_to == MEM_REG)
           reg_vr[mem_to_index[3:0]] <= data;
+        if (mem_to == MEM_RPL)
+          reg_rpl[mem_to_index[2:0]] <= data;
         
         if (mem_delay_cycle)
         begin
@@ -354,6 +359,9 @@ module cpu(
           mem_from_index <= reg_i;
           mem_delay_cycle <= 1;
           state <= CPU_DRAW;
+            
+//          if (reg_ir[3:0] == 0)
+//            state <= CPU_IDLE;    
           end
         else if (reg_ir[15:12] == 4'hE && reg_ir[7:0] == 8'h9E)
           begin
@@ -426,6 +434,28 @@ module cpu(
           mem_to <= MEM_REG;
           mem_to_index <= 0;
           mem_delay_cycle <= 1;
+          mem_is_fetch <= 0;
+          state <= CPU_MEMORY;
+          end
+        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h75)
+          begin
+          mem_count <= {8'h00, reg_ir[11:8]};
+          mem_from <= MEM_REG;
+          mem_from_index <= 0;
+          mem_to <= MEM_RPL;
+          mem_to_index <= 0;
+          mem_delay_cycle <= 0;
+          mem_is_fetch <= 0;
+          state <= CPU_MEMORY;
+          end
+        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h85)
+          begin
+          mem_count <= {8'h00, reg_ir[11:8]};
+          mem_from <= MEM_RPL;
+          mem_from_index <= 0;
+          mem_to <= MEM_REG;
+          mem_to_index <= 0;
+          mem_delay_cycle <= 0;
           mem_is_fetch <= 0;
           state <= CPU_MEMORY;
           end
