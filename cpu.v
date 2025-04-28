@@ -166,7 +166,23 @@ module cpu(
         mem_delay_cycle <= 1;
         mem_is_fetch <= 0;
         
+        reg_vr[4'h0] <= 0;
+        reg_vr[4'h1] <= 0;
+        reg_vr[4'h2] <= 0;
+        reg_vr[4'h3] <= 0;
+        reg_vr[4'h4] <= 0;
+        reg_vr[4'h5] <= 0;
+        reg_vr[4'h6] <= 0;
+        reg_vr[4'h7] <= 0;
+        reg_vr[4'h8] <= 0;
+        reg_vr[4'h9] <= 0;
+        reg_vr[4'ha] <= 0;
+        reg_vr[4'hb] <= 0;
+        reg_vr[4'hc] <= 0;
+        reg_vr[4'hd] <= 0;
+        reg_vr[4'he] <= 0;
         reg_vr[4'hf] <= 0;
+
         reg_sp <= 0;
         reg_pc <= 12'h0200;
        
