@@ -433,7 +433,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h55)
           begin
-          reg_i <= reg_i + {8'h00, reg_ir[11:8]};
+          reg_i <= reg_i + {8'h00, reg_ir[11:8]} + 1;
           mem_count <= {8'h00, reg_ir[11:8]};
           mem_from <= MEM_REG;
           mem_from_index <= 0;
@@ -445,7 +445,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h65)
           begin
-          reg_i <= reg_i + {8'h00, reg_ir[11:8]};
+          reg_i <= reg_i + {8'h00, reg_ir[11:8]} + 1;
           mem_count <= {8'h00, reg_ir[11:8]};
           mem_from <= MEM_RAM;
           mem_from_index <= reg_i;
