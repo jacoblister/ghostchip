@@ -180,7 +180,7 @@ module cpu(
         reg_vr[4'hb] <= 0;
         reg_vr[4'hc] <= 0;
         reg_vr[4'hd] <= 0;
-        reg_vr[4'he] <= 15;
+        reg_vr[4'he] <= 0;
         reg_vr[4'hf] <= 0;
 
         reg_sp <= 0;
