@@ -101,13 +101,13 @@ module cpu(
   reg mem_delay_cycle = 0;
   reg mem_is_fetch = 0;
 
-  reg [6:0] draw_x = 0;
-  reg [5:0] draw_y = 0;
+  reg [7:0] draw_x = 0;
+  reg [7:0] draw_y = 0;
   reg [3:0] draw_rx = 0;
   reg [3:0] draw_ry = 0;
   reg [3:0] draw_n = 8;
-  assign vram_hpos = draw_x;
-  assign vram_vpos = draw_y;
+  assign vram_hpos = draw_x[6:0];
+  assign vram_vpos = draw_y[5:0];
   
   assign vram_we = state == CPU_CLEAR || (state == CPU_DRAW && mem_delay_cycle == 0);
   wire[7:0] vram_ram_index = 7 - (draw_x - reg_vr[draw_rx]);
@@ -180,7 +180,7 @@ module cpu(
         reg_vr[4'hb] <= 0;
         reg_vr[4'hc] <= 0;
         reg_vr[4'hd] <= 0;
-        reg_vr[4'he] <= 0;
+        reg_vr[4'he] <= 15;
         reg_vr[4'hf] <= 0;
 
         reg_sp <= 0;
@@ -368,8 +368,8 @@ module cpu(
           reg_vr[4'hf] <= 0;
           draw_rx <= reg_ir[11:8];
           draw_ry <= reg_ir[7:4];
-          draw_x <= reg_vr[reg_ir[11:8]][6:0];
-          draw_y <= reg_vr[reg_ir[7:4]][5:0];
+          draw_x <= {1'h0, reg_vr[reg_ir[11:8]][6:0]};
+          draw_y <= {2'h0, reg_vr[reg_ir[7:4]][5:0]};
           draw_n <= reg_ir[3:0];
           mem_from <= MEM_RAM;
           mem_from_index <= reg_i;
@@ -506,7 +506,7 @@ module cpu(
 
           if (draw_x >= reg_vr[draw_rx][6:0] + 7)
             begin
-            draw_x <= reg_vr[draw_rx][6:0];
+            draw_x <= {1'h0, reg_vr[draw_rx][6:0]};
             draw_y <= draw_y + 1;
             if (draw_n == 1)
               state <= CPU_FETCH;
@@ -525,7 +525,6 @@ module cpu(
           end
       end
       CPU_IDLE: begin
-        draw_x <= ram_dout[6:0];
       end
     endcase
   end  
