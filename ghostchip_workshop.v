@@ -48,6 +48,21 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   wire [11:0] rom_addr;
   wire [7:0] rom_dout;
 
+  reg [7:0] mem [0:4095];
+  initial begin
+  $readmemh("chip8logo.hex", mem);
+  $readmemh("flags.hex", mem);
+  $readmemh("keypad.hex", mem);
+  $readmemh("random.hex", mem);
+  $readmemh("snake.hex", mem);
+  $readmemh("blinky.hex", mem);
+  $readmemh("down8.hex", mem);
+  $readmemh("rockto.hex", mem);
+  $readmemh("chipcross.hex", mem);
+  $readmemh("squad.hex", mem);
+  $readmemh("sound.hex", mem);
+  end
+  
   rom rom(
     .clk(clk),
     .addr(rom_addr),

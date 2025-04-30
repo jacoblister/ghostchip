@@ -161,8 +161,8 @@ module cpu(
         mem_from <= MEM_ROM;
         mem_from_index <= 0;
         mem_to <= MEM_RAM;
-        mem_to_index <= 12'h0200;
-        mem_count <= 12'h0E00;
+        mem_to_index <= 12'h0000;
+        mem_count <= 12'h0FFF;
         mem_delay_cycle <= 1;
         mem_is_fetch <= 0;
         
