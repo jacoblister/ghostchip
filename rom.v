@@ -11,6 +11,10 @@ module rom(
   end
   
   initial begin
+    integer j;
+    for(j = 0; j < 4095; j = j+1) 
+      mem[j] = 0;
+
 //   $readmemh("pokemon.hex", mem);
 //   $readmemh("cubes.hex", mem);
 //   $readmemh("flags.hex", mem);
@@ -24,5 +28,6 @@ module rom(
 
 //   $readmemh("rockto.hex", mem);
    $readmemh("chipcross.hex", mem);
+//   $readmemh("squad.hex", mem);
   end  
 endmodule
