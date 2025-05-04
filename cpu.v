@@ -101,18 +101,32 @@ module cpu(
   reg mem_delay_cycle = 0;
   reg mem_is_fetch = 0;
 
-  reg [7:0] draw_x = 0;
-  reg [7:0] draw_y = 0;
-  reg [3:0] draw_rx = 0;
-  reg [3:0] draw_ry = 0;
-  reg [3:0] draw_n = 8;
-  assign vram_hpos = draw_x[6:0];
-  assign vram_vpos = draw_y[5:0];
+  parameter DRAW_CLEAR     = 0;
+  parameter DRAW_SPRITE_8  = 1;
+  parameter DRAW_SPRITE_16 = 2;
+  reg [1:0] draw_op;
+  reg [12:0] draw_i = 0;
+  reg [12:0] draw_n = 0;
+  reg [11:0] draw_count = 0;
+  reg [6:0] draw_x = 0;
+  reg [5:0] draw_y = 0;
+  assign vram_hpos = 
+    draw_op == DRAW_CLEAR ? draw_i[6:0] :
+    draw_op == DRAW_SPRITE_8 ? draw_x + {4'h0, draw_i[2:0]} :
+    draw_op == DRAW_SPRITE_16 ? draw_x + {3'h0, draw_i[3:0]} :
+    0;
+  assign vram_vpos = 
+    draw_op == DRAW_CLEAR ? draw_i[12:7] :
+    draw_op == DRAW_SPRITE_8 ? draw_y + draw_i[8:3] :
+    draw_op == DRAW_SPRITE_16 ? draw_y + draw_i[8:4] :
+    0;
+    
   
   assign vram_we = state == CPU_CLEAR || (state == CPU_DRAW && mem_delay_cycle == 0);
-  wire[7:0] vram_ram_index = 7 - (draw_x - reg_vr[draw_rx]);
+  wire[2:0] vram_ram_index = 7 - draw_i[2:0];
+
   assign vram_pixeli = 
-    state == CPU_DRAW ? ram_dout[vram_ram_index[2:0]] ^ vram_pixelo[0] ? 3 : 0 : 
+    state == CPU_DRAW ? ram_dout[vram_ram_index] ^ vram_pixelo[0] ? 3 : 0 : 
     state == CPU_CLEAR ? 0 :
     0;
 
@@ -158,6 +172,10 @@ module cpu(
     
     case (state)
       CPU_INIT: begin
+        draw_i <= 0;
+        draw_n <= 13'h1fff;
+        draw_op <= DRAW_CLEAR;
+
         mem_from <= MEM_ROM;
         mem_from_index <= 0;
         mem_to <= MEM_RAM;
@@ -237,8 +255,9 @@ module cpu(
       CPU_EXEC: begin
         if (reg_ir == 16'h00e0)
           begin
-          draw_x <= 0;
-          draw_y <= 0;
+          draw_i <= 0;
+          draw_n <= 13'h1fff;
+          draw_op <= DRAW_CLEAR;
           state <= CPU_CLEAR;
           end
         else if (reg_ir == 16'h00ee)
@@ -366,18 +385,21 @@ module cpu(
         else if (reg_ir[15:12] == 4'hD)
           begin
           reg_vr[4'hf] <= 0;
-          draw_rx <= reg_ir[11:8];
-          draw_ry <= reg_ir[7:4];
-          draw_x <= {1'h0, reg_vr[reg_ir[11:8]][6:0]};
-          draw_y <= {2'h0, reg_vr[reg_ir[7:4]][5:0]};
-          draw_n <= reg_ir[3:0];
+          draw_x <= reg_vr[reg_ir[11:8]][6:0];
+          draw_y <= reg_vr[reg_ir[7:4]][5:0];
+          draw_i <= 0;
+          draw_n <= {6'h0, reg_ir[3:0], 3'h0} - 1;
           mem_from <= MEM_RAM;
           mem_from_index <= reg_i;
           mem_delay_cycle <= 1;
+          draw_op <= DRAW_SPRITE_8;
           state <= CPU_DRAW;
             
-//          if (reg_ir[3:0] == 0)
-//            state <= CPU_IDLE;    
+          if (reg_ir[3:0] == 0)
+            begin
+              draw_op <= DRAW_SPRITE_16;
+              draw_n <= (16 * 16) - 1;
+            end
           end
         else if (reg_ir[15:12] == 4'hE && reg_ir[7:0] == 8'h9E)
           begin
@@ -418,6 +440,11 @@ module cpu(
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h29)
           begin
           reg_i <= reg_vr[reg_ir[11:8]] * 5;
+          state <= CPU_FETCH;
+          end
+        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h30)
+          begin
+          reg_i <= 80 + reg_vr[reg_ir[11:8]] * 10;
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h33)
@@ -481,16 +508,9 @@ module cpu(
           state <= CPU_IDLE;
       end
       CPU_CLEAR: begin
-        draw_x <= draw_x + 1;
-        if (draw_x == 127)
-          begin
-            draw_x <= 0;
-            draw_y <= draw_y + 1;
-          end
-        if (draw_x == 127 && draw_y == 63)
-          begin
-            state <= CPU_FETCH;
-          end
+        draw_i <= draw_i + 1;
+        if (draw_i == draw_n)
+          state <= CPU_FETCH;
       end
       CPU_DRAW: begin
         if (mem_delay_cycle)
@@ -499,22 +519,17 @@ module cpu(
           end
         else
           begin
-          reg_vr[4'hf] <= vram_pixelo[0] && ram_dout[vram_ram_index[2:0]] ? 1 : reg_vr[4'hf];
-
-          mem_delay_cycle <= 1;
-          draw_x <= draw_x + 1;
-
-          if (draw_x >= reg_vr[draw_rx][6:0] + 7)
-            begin
-            draw_x <= {1'h0, reg_vr[draw_rx][6:0]};
-            draw_y <= draw_y + 1;
-            if (draw_n == 1)
+            mem_delay_cycle <= 1;
+            reg_vr[4'hf] <= vram_pixelo[0] && ram_dout[vram_ram_index[2:0]] ? 1 : reg_vr[4'hf];
+          
+            draw_i <= draw_i + 1;
+            if (draw_i[2:0] == 7)
+              begin
+                mem_from_index <= mem_from_index + 1;
+              end
+            
+            if (draw_i == draw_n)
               state <= CPU_FETCH;
-            else
-              draw_n <= draw_n - 1;
-
-            mem_from_index <= mem_from_index + 1;
-            end
           end
         end
       CPU_KEYPRESS: begin
