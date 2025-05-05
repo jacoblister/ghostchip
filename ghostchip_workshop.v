@@ -60,6 +60,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   $readmemh("rockto.hex", mem);
   $readmemh("chipcross.hex", mem);
   $readmemh("squad.hex", mem);
+  $readmemh("octopaint.hex", mem);
   $readmemh("sound.hex", mem);
   end
   
