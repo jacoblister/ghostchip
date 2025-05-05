@@ -45,7 +45,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
     .matrix(keypad_matrix)
   );
   
-  wire [11:0] rom_addr;
+  wire [15:0] rom_addr;
   wire [7:0] rom_dout;
 
   reg [7:0] mem [0:4095];
@@ -66,18 +66,18 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   
   rom rom(
     .clk(clk),
-    .addr(rom_addr),
+    .addr(rom_addr[13:0]),
     .dout(rom_dout)
   );
   
-  wire [11:0] ram_addr;
+  wire [15:0] ram_addr;
   wire [7:0] ram_din;
   wire [7:0] ram_dout;
   wire ram_we;
   ram ram(
     .clk(clk),
     .we(ram_we),
-    .addr(ram_addr),
+    .addr(ram_addr[13:0]),
     .din(ram_din),
     .dout(ram_dout)
   );

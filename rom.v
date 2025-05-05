@@ -1,10 +1,10 @@
 module rom(
   input  clk,        
-  input  [11:0] addr,    
+  input  [13:0] addr,    
   output reg [7:0] dout
   );
   
-  reg [7:0] mem [0:4095];
+  reg [7:0] mem [0:16383];
   
   always @(posedge clk) begin
     dout <= mem[addr];
@@ -24,15 +24,16 @@ module rom(
 //      = "rockto.hex";
 //      = "chipcross.hex";
 //      = "squad.hex";
-      = "dvn8.hex";
+//      = "dvn8.hex";
+      = "octopaint.hex";
     
     `ifdef __8BITWORKSHOP__
     integer j;
-    for(j = 0; j < 4095; j = j+1) 
+    for(j = 0; j < 16383; j = j+1) 
       mem[j] = 0;
     
     $readmemh(MEM_INIT_FILE, mem);
-    for(j = 4095; j >= 512; j = j-1) 
+    for(j = 16383; j >= 512; j = j-1) 
       mem[j] = mem[j - 512];
     `endif
     

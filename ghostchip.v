@@ -86,7 +86,7 @@ module ghostchip (
 //   assign speaker = !button && speaker_counter[15];
 //   assign speaker_inv = !button && !speaker;    
     
-  wire [11:0] rom_addr;
+  wire [15:0] rom_addr;
   wire [7:0] rom_dout;
   rom rom(
     .clk(clk),
@@ -94,14 +94,14 @@ module ghostchip (
     .dout(rom_dout)
   );
   
-  wire [11:0] ram_addr;
+  wire [15:0] ram_addr;
   wire [7:0] ram_din;
   wire [7:0] ram_dout;
   wire ram_we;
   ram ram(
     .clk(clk),
     .we(ram_we),
-    .addr(ram_addr),
+    .addr(ram_addr[13:0]),
     .din(ram_din),
     .dout(ram_dout)
   );
@@ -134,9 +134,9 @@ module ghostchip (
     .hires(hires),
     .vsync(clk_60hz),
     .keypad_matrix(keypad_matrix),
-    .rom_addr(rom_addr),
+    .rom_addr(rom_addr[13:0]),
     .rom_dout(rom_dout),
-    .ram_addr(ram_addr),
+    .ram_addr(ram_addr[13:0]),
     .ram_din(ram_din),
     .ram_dout(ram_dout),
     .ram_we(ram_we),

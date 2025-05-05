@@ -38,9 +38,9 @@ module cpu(
   output beep,
   output reg hires = 0,
   input [15:0] keypad_matrix,
-  output [11:0] rom_addr,
+  output [15:0] rom_addr,
   input [7:0] rom_dout,
-  output [11:0] ram_addr,
+  output [15:0] ram_addr,
   output [7:0] ram_din,
   input [7:0] ram_dout,
   output ram_we,
@@ -79,10 +79,10 @@ module cpu(
   parameter MEM_IR  = 4;
   parameter MEM_RPL = 5;
   
-  reg [11:0] reg_pc;
-  reg [11:0] reg_i;
+  reg [15:0] reg_pc;
+  reg [15:0] reg_i;
   reg [7:0] reg_vr [16];
-  reg [11:0] reg_stack [8];
+  reg [15:0] reg_stack [8];
   reg [7:0] reg_rpl [8];
   reg [2:0] reg_sp;
   reg [15:0] reg_ir;
@@ -94,10 +94,10 @@ module cpu(
     
   reg [3:0] state = CPU_INIT;
   reg [2:0] mem_from;
-  reg [11:0] mem_from_index = 0;
+  reg [15:0] mem_from_index = 0;
   reg [2:0] mem_to;
-  reg [11:0] mem_to_index = 0;
-  reg [11:0] mem_count;
+  reg [15:0] mem_to_index = 0;
+  reg [15:0] mem_count;
   reg mem_delay_cycle = 0;
   reg mem_is_fetch = 0;
 
@@ -190,8 +190,8 @@ module cpu(
         mem_from <= MEM_ROM;
         mem_from_index <= 0;
         mem_to <= MEM_RAM;
-        mem_to_index <= 12'h0000;
-        mem_count <= 12'h0FFF;
+        mem_to_index <= 16'h0000;
+        mem_count <= 16'h0FFF;
         mem_delay_cycle <= 1;
         mem_is_fetch <= 0;
         
@@ -213,7 +213,7 @@ module cpu(
         reg_vr[4'hf] <= 0;
 
         reg_sp <= 0;
-        reg_pc <= 12'h0200;
+        reg_pc <= 16'h0200;
        
         state <= CPU_MEMORY;
       end
@@ -289,13 +289,13 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'h1)
           begin
-          reg_pc <= reg_ir[11:0];
+          reg_pc <= {4'h0, reg_ir[11:0]};
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'h2)
           begin
           reg_stack[reg_sp] <= reg_pc;
-          reg_pc <= reg_ir[11:0];
+          reg_pc <= {4'h0, reg_ir[11:0]};
           reg_sp <= reg_sp + 1;
           state <= CPU_FETCH;
           end
@@ -385,7 +385,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hA)
           begin
-          reg_i <= reg_ir[11:0];
+          reg_i <= {4'h0, reg_ir[11:0]};
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'hC)
@@ -450,7 +450,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h1E)
           begin
-          reg_i <= reg_i + {4'h00, reg_vr[reg_ir[11:8]]};
+          reg_i <= reg_i + {8'h00, reg_vr[reg_ir[11:8]]};
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h29)
@@ -476,8 +476,8 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h55)
           begin
-          reg_i <= reg_i + {8'h00, reg_ir[11:8]} + 1;
-          mem_count <= {8'h00, reg_ir[11:8]};
+          reg_i <= reg_i + {12'h00, reg_ir[11:8]} + 1;
+          mem_count <= {12'h00, reg_ir[11:8]};
           mem_from <= MEM_REG;
           mem_from_index <= 0;
           mem_to <= MEM_RAM;
@@ -488,8 +488,8 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h65)
           begin
-          reg_i <= reg_i + {8'h00, reg_ir[11:8]} + 1;
-          mem_count <= {8'h00, reg_ir[11:8]};
+          reg_i <= reg_i + {12'h00, reg_ir[11:8]} + 1;
+          mem_count <= {12'h00, reg_ir[11:8]};
           mem_from <= MEM_RAM;
           mem_from_index <= reg_i;
           mem_to <= MEM_REG;
@@ -500,7 +500,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h75)
           begin
-          mem_count <= {8'h00, reg_ir[11:8]};
+          mem_count <= {12'h00, reg_ir[11:8]};
           mem_from <= MEM_REG;
           mem_from_index <= 0;
           mem_to <= MEM_RPL;
@@ -511,7 +511,7 @@ module cpu(
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h85)
           begin
-          mem_count <= {8'h00, reg_ir[11:8]};
+          mem_count <= {12'h00, reg_ir[11:8]};
           mem_from <= MEM_RPL;
           mem_from_index <= 0;
           mem_to <= MEM_REG;
