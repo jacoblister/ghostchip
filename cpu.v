@@ -120,13 +120,24 @@ module cpu(
     draw_op == DRAW_SPRITE_8 ? draw_y + draw_i[8:3] :
     draw_op == DRAW_SPRITE_16 ? draw_y + draw_i[8:4] :
     0;
-    
   
+  parameter DRAW_PLANE_CLONE = 0;
+  parameter DRAW_PLANE_0     = 1;
+  parameter DRAW_PLANE_1     = 2;
+  parameter DRAW_PLANE_0_1   = 3;
+  
+  reg [1:0] draw_plane_mode = DRAW_PLANE_CLONE;
+  wire draw_plane = draw_plane_mode == DRAW_PLANE_1;
+  wire draw_plane_0 = draw_plane_mode != DRAW_PLANE_1;
+  wire draw_plane_1 = draw_plane_mode == DRAW_PLANE_1 || draw_plane_mode == DRAW_PLANE_CLONE;
+    
   assign vram_we = state == CPU_CLEAR || (state == CPU_DRAW && mem_delay_cycle == 0);
   wire[2:0] vram_ram_index = 7 - draw_i[2:0];
 
   assign vram_pixeli = 
-    state == CPU_DRAW ? ram_dout[vram_ram_index] ^ vram_pixelo[0] ? 3 : 0 : 
+    state == CPU_DRAW ? 
+      ((ram_dout[vram_ram_index] & draw_plane_0) ^ vram_pixelo[0] ? 1 : 0) |
+      ((ram_dout[vram_ram_index] & draw_plane_1) ^ vram_pixelo[1] ? 2 : 0) :
     state == CPU_CLEAR ? 0 :
     0;
 
@@ -413,6 +424,11 @@ module cpu(
             reg_pc <= reg_pc + 2;
           state <= CPU_FETCH;
           end
+        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h01)
+          begin
+          draw_plane_mode <= reg_ir[9:8];
+          state <= CPU_FETCH;
+          end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h07)
           begin
           reg_vr[reg_ir[11:8]] <= reg_dt;
@@ -520,7 +536,7 @@ module cpu(
         else
           begin
             mem_delay_cycle <= 1;
-            reg_vr[4'hf] <= vram_pixelo[0] && ram_dout[vram_ram_index[2:0]] ? 1 : reg_vr[4'hf];
+            reg_vr[4'hf] <= vram_pixelo[draw_plane] && ram_dout[vram_ram_index[2:0]] ? 1 : reg_vr[4'hf];
           
             draw_i <= draw_i + 1;
             if (draw_i[2:0] == 7)
