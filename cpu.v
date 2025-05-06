@@ -78,6 +78,7 @@ module cpu(
   parameter MEM_BCD = 3;
   parameter MEM_IR  = 4;
   parameter MEM_RPL = 5;
+  parameter MEM_I   = 6;
   
   reg [15:0] reg_pc;
   reg [15:0] reg_i;
@@ -99,7 +100,6 @@ module cpu(
   reg [15:0] mem_to_index = 0;
   reg [15:0] mem_count;
   reg mem_delay_cycle = 0;
-  reg mem_is_fetch = 0;
 
   parameter DRAW_CLEAR     = 0;
   parameter DRAW_SPRITE_8  = 1;
@@ -193,7 +193,6 @@ module cpu(
         mem_to_index <= 16'h0000;
         mem_count <= 16'h0FFF;
         mem_delay_cycle <= 1;
-        mem_is_fetch <= 0;
         
         reg_vr[4'h0] <= 0;
         reg_vr[4'h1] <= 0;
@@ -222,6 +221,10 @@ module cpu(
           reg_ir[15:8] <= data;
         if (mem_to == MEM_IR && mem_to_index == 1) 
           reg_ir[7:0] <= data;
+        if (mem_to == MEM_I && mem_to_index == 0) 
+          reg_i[15:8] <= data;
+        if (mem_to == MEM_I && mem_to_index == 1) 
+          reg_i[7:0] <= data;
         if (mem_to == MEM_REG)
           reg_vr[mem_to_index[3:0]] <= data;
         if (mem_to == MEM_RPL)
@@ -241,7 +244,7 @@ module cpu(
           end
           else
             state <= 
-              mem_is_fetch ? CPU_EXEC : 
+              mem_to == MEM_IR ? CPU_EXEC :
               mem_from == MEM_ROM ? CPU_CLEAR :
               CPU_FETCH;
       end
@@ -251,7 +254,6 @@ module cpu(
         mem_to <= MEM_IR;
         mem_to_index <= 0;
         mem_count <= 2;
-        mem_is_fetch <= 1;
         mem_delay_cycle <= 1;
         reg_pc <= reg_pc + 2;
 
@@ -424,6 +426,17 @@ module cpu(
             reg_pc <= reg_pc + 2;
           state <= CPU_FETCH;
           end
+        else if (reg_ir[15:0] == 16'hF000)
+          begin
+          mem_from <= MEM_RAM;
+          mem_from_index <= reg_pc;
+          mem_to <= MEM_I;
+          mem_to_index <= 0;
+          mem_count <= 2;
+          mem_delay_cycle <= 1;
+          reg_pc <= reg_pc + 2;
+          state <= CPU_MEMORY;
+          end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h01)
           begin
           draw_plane_mode <= reg_ir[9:8];
@@ -471,7 +484,6 @@ module cpu(
           mem_to <= MEM_RAM;
           mem_to_index <= reg_i;
           mem_delay_cycle <= 0;
-          mem_is_fetch <= 0;
           state <= CPU_MEMORY;
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h55)
@@ -483,7 +495,6 @@ module cpu(
           mem_to <= MEM_RAM;
           mem_to_index <= reg_i;
           mem_delay_cycle <= 0;
-          mem_is_fetch <= 0;
           state <= CPU_MEMORY;
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h65)
@@ -495,7 +506,6 @@ module cpu(
           mem_to <= MEM_REG;
           mem_to_index <= 0;
           mem_delay_cycle <= 1;
-          mem_is_fetch <= 0;
           state <= CPU_MEMORY;
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h75)
@@ -506,7 +516,6 @@ module cpu(
           mem_to <= MEM_RPL;
           mem_to_index <= 0;
           mem_delay_cycle <= 0;
-          mem_is_fetch <= 0;
           state <= CPU_MEMORY;
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h85)
@@ -517,7 +526,6 @@ module cpu(
           mem_to <= MEM_REG;
           mem_to_index <= 0;
           mem_delay_cycle <= 0;
-          mem_is_fetch <= 0;
           state <= CPU_MEMORY;
           end
         else 
