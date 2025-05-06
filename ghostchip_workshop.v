@@ -62,6 +62,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   $readmemh("squad.hex", mem);
   $readmemh("octopaint.hex", mem);
   $readmemh("garden.hex", mem);
+  $readmemh("expedition.hex", mem);
   $readmemh("garlicscape.hex", mem);
   $readmemh("sound.hex", mem);
   end

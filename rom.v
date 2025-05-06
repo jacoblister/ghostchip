@@ -20,12 +20,15 @@ module rom(
 //      = "pong.hex";
 //      = "snake.hex";
 //      = "blinky.hex";
-//      = "down8.hex";
+      = "down8.hex";
 //      = "rockto.hex";
 //      = "chipcross.hex";
 //      = "squad.hex";
 //      = "dvn8.hex";
-      = "octopaint.hex";
+//      = "octopaint.hex";
+//      = "garden.hex";
+//      = "expedition.hex";
+//      = "sound.hex";
     
     `ifdef __8BITWORKSHOP__
     integer j;
