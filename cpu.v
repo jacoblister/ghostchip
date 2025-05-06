@@ -191,7 +191,7 @@ module cpu(
         mem_from_index <= 0;
         mem_to <= MEM_RAM;
         mem_to_index <= 16'h0000;
-        mem_count <= 16'h0FFF;
+        mem_count <= 16'h3FFF;
         mem_delay_cycle <= 1;
         
         reg_vr[4'h0] <= 0;
