@@ -52,6 +52,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   initial begin
   $readmemh("chip8logo.hex", mem);
   $readmemh("flags.hex", mem);
+  $readmemh("quirks.hex", mem);
   $readmemh("keypad.hex", mem);
   $readmemh("random.hex", mem);
   $readmemh("snake.hex", mem);

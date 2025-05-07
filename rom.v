@@ -14,6 +14,7 @@ module rom(
     parameter MEM_INIT_FILE 
 //      = "chip8logo.hex";
 //      = "flags.hex";
+//      = "quirks.hex";
 //      = "keypad.hex";
 //      = "beep.hex";
 //      = "random.hex";

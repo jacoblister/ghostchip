@@ -313,11 +313,41 @@ module cpu(
             reg_pc <= reg_pc + 2;
           state <= CPU_FETCH;
           end
-        else if (reg_ir[15:12] == 4'h5)
+        else if (reg_ir[15:12] == 4'h5 && reg_ir[3:0] == 4'h0)
           begin
           if (reg_vr[reg_ir[11:8]] == reg_vr[reg_ir[7:4]])
             reg_pc <= reg_pc + 2;
           state <= CPU_FETCH;
+          end
+        else if (reg_ir[15:12] == 4'h5 && reg_ir[3:0] == 4'h02)
+          begin
+          if (reg_ir[11:8] > reg_ir[7:4])
+            state <= CPU_IDLE;
+          else
+            begin
+            mem_count <= {12'h00, reg_ir[7:4] - reg_ir[11:8]};
+            mem_from <= MEM_REG;
+            mem_from_index <= {12'h0, reg_ir[11:8]};
+            mem_to <= MEM_RAM;
+            mem_to_index <= reg_i;
+            mem_delay_cycle <= 0;
+            state <= CPU_MEMORY;
+            end
+          end
+        else if (reg_ir[15:12] == 4'h5 && reg_ir[3:0] == 4'h03)
+          begin
+          if (reg_ir[11:8] > reg_ir[7:4])
+              state <= CPU_IDLE;
+          else
+            begin
+            mem_count <= {12'h00, reg_ir[7:4] - reg_ir[11:8]};
+            mem_from <= MEM_RAM;
+            mem_from_index <= reg_i;
+            mem_to <= MEM_REG;
+            mem_to_index <= {12'h0, reg_ir[11:8]};
+            mem_delay_cycle <= 1;
+            state <= CPU_MEMORY;
+            end
           end
         else if (reg_ir[15:12] == 4'h6)
           begin
@@ -390,6 +420,11 @@ module cpu(
           reg_i <= {4'h0, reg_ir[11:0]};
           state <= CPU_FETCH;
           end
+        else if (reg_ir[15:12] == 4'hB)
+          begin
+          reg_pc <= {4'h0, reg_ir[11:0]} + {8'h0, reg_vr[0]};
+          state <= CPU_FETCH;
+          end
         else if (reg_ir[15:12] == 4'hC)
           begin
           reg_vr[reg_ir[11:8]] <= reg_rng & reg_ir[7:0];
@@ -440,6 +475,10 @@ module cpu(
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h01)
           begin
           draw_plane_mode <= reg_ir[9:8];
+          state <= CPU_FETCH;
+          end
+        else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h02)
+          begin
           state <= CPU_FETCH;
           end
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h07)
