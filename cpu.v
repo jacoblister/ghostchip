@@ -518,7 +518,7 @@ module cpu(
         else if (reg_ir[15:12] == 4'hF && reg_ir[7:0] == 8'h33)
           begin
           mem_from <= MEM_BCD;
-          mem_count <= 3;
+          mem_count <= 2;
           mem_from_index <= 0;
           mem_to <= MEM_RAM;
           mem_to_index <= reg_i;
