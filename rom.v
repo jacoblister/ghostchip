@@ -29,6 +29,8 @@ module rom(
 //      = "octopaint.hex";
 //      = "garden.hex";
 //      = "expedition.hex";
+//      = "garlicscape.hex";
+//      = "superneatboy.hex";
 //      = "sound.hex";
     
     `ifdef __8BITWORKSHOP__
