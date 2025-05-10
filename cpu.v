@@ -127,10 +127,10 @@ module cpu(
   parameter DRAW_PLANE_0_1   = 3;
   
   reg [1:0] draw_plane_mode = DRAW_PLANE_CLONE;
-  wire draw_plane = draw_plane_mode == DRAW_PLANE_1;
-  wire draw_plane_0 = draw_plane_mode != DRAW_PLANE_1;
-  wire draw_plane_1 = draw_plane_mode == DRAW_PLANE_1 || draw_plane_mode == DRAW_PLANE_CLONE;
-    
+  reg draw_plane = 0;
+  wire draw_plane_0 = !draw_plane || draw_plane_mode == DRAW_PLANE_CLONE;
+  wire draw_plane_1 = draw_plane || draw_plane_mode == DRAW_PLANE_CLONE;
+  
   assign vram_we = state == CPU_CLEAR || (state == CPU_DRAW && mem_delay_cycle == 0);
   wire[2:0] vram_ram_index = 7 - draw_i[2:0];
 
@@ -337,7 +337,7 @@ module cpu(
         else if (reg_ir[15:12] == 4'h5 && reg_ir[3:0] == 4'h03)
           begin
           if (reg_ir[11:8] > reg_ir[7:4])
-              state <= CPU_IDLE;
+            state <= CPU_IDLE;
           else
             begin
             mem_count <= {12'h00, reg_ir[7:4] - reg_ir[11:8]};
@@ -442,12 +442,13 @@ module cpu(
           mem_delay_cycle <= 1;
           draw_op <= DRAW_SPRITE_8;
           state <= CPU_DRAW;
-            
+          
           if (reg_ir[3:0] == 0)
             begin
               draw_op <= DRAW_SPRITE_16;
               draw_n <= (16 * 16) - 1;
             end
+          draw_plane <= draw_plane_mode == DRAW_PLANE_1;
           end
         else if (reg_ir[15:12] == 4'hE && reg_ir[7:0] == 8'h9E)
           begin
@@ -592,7 +593,18 @@ module cpu(
               end
             
             if (draw_i == draw_n)
-              state <= CPU_FETCH;
+              begin
+                if (draw_plane_mode == DRAW_PLANE_0_1 && !draw_plane)
+                  begin
+                    draw_plane <= 1;
+		                draw_x <= reg_vr[reg_ir[11:8]][6:0];
+                    draw_y <= reg_vr[reg_ir[7:4]][5:0];
+                    draw_i <= 0;
+                    state <= CPU_DRAW;
+                  end
+                else 
+                  state <= CPU_FETCH;
+              end
           end
         end
       CPU_KEYPRESS: begin
