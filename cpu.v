@@ -40,6 +40,7 @@ module cpu(
   input [15:0] keypad_matrix,
   output [15:0] rom_addr,
   input [7:0] rom_dout,
+  input rom_dready,
   output [15:0] ram_addr,
   output [7:0] ram_din,
   input [7:0] ram_dout,
@@ -177,7 +178,7 @@ module cpu(
       if (reg_st > 0)
         reg_st <= reg_st - 1;
       if (state == CPU_WAIT)
-        cpu_limit <= 10;
+        cpu_limit <= 400;
         state <= CPU_MEMORY;
       end
     
@@ -192,7 +193,7 @@ module cpu(
         mem_to <= MEM_RAM;
         mem_to_index <= 16'h0000;
         mem_count <= 16'h3FFF;
-        mem_delay_cycle <= 1;
+        mem_delay_cycle <= 0;
         
         reg_vr[4'h0] <= 0;
         reg_vr[4'h1] <= 0;
@@ -217,36 +218,39 @@ module cpu(
         state <= CPU_MEMORY;
       end
       CPU_MEMORY: begin
-        if (mem_to == MEM_IR && mem_to_index == 0) 
-          reg_ir[15:8] <= data;
-        if (mem_to == MEM_IR && mem_to_index == 1) 
-          reg_ir[7:0] <= data;
-        if (mem_to == MEM_I && mem_to_index == 0) 
-          reg_i[15:8] <= data;
-        if (mem_to == MEM_I && mem_to_index == 1) 
-          reg_i[7:0] <= data;
-        if (mem_to == MEM_REG)
-          reg_vr[mem_to_index[3:0]] <= data;
-        if (mem_to == MEM_RPL)
-          reg_rpl[mem_to_index[2:0]] <= data;
+        if (mem_from != MEM_ROM || rom_dready)
+          begin
+          if (mem_to == MEM_IR && mem_to_index == 0) 
+            reg_ir[15:8] <= data;
+          if (mem_to == MEM_IR && mem_to_index == 1) 
+            reg_ir[7:0] <= data;
+          if (mem_to == MEM_I && mem_to_index == 0) 
+            reg_i[15:8] <= data;
+          if (mem_to == MEM_I && mem_to_index == 1) 
+            reg_i[7:0] <= data;
+          if (mem_to == MEM_REG)
+            reg_vr[mem_to_index[3:0]] <= data;
+          if (mem_to == MEM_RPL)
+            reg_rpl[mem_to_index[2:0]] <= data;
         
-        if (mem_delay_cycle)
-        begin
-          mem_from_index <= mem_from_index + 1;
-          mem_delay_cycle <= 0;
-        end
-        else
-          if (mem_count > 0)
+          if (mem_delay_cycle)
           begin
             mem_from_index <= mem_from_index + 1;
-            mem_to_index <= mem_to_index + 1;
-            mem_count <= mem_count - 1;
+            mem_delay_cycle <= 0;
           end
           else
-            state <= 
-              mem_to == MEM_IR ? CPU_EXEC :
-              mem_from == MEM_ROM ? CPU_CLEAR :
-              CPU_FETCH;
+            if (mem_count > 0)
+            begin
+              mem_from_index <= mem_from_index + 1;
+              mem_to_index <= mem_to_index + 1;
+              mem_count <= mem_count - 1;
+            end
+            else
+              state <= 
+                mem_to == MEM_IR ? CPU_EXEC :
+                mem_from == MEM_ROM ? CPU_CLEAR :
+                CPU_FETCH;
+          end
       end
       CPU_FETCH: begin
         mem_from <= MEM_RAM;
@@ -597,7 +601,7 @@ module cpu(
                 if (draw_plane_mode == DRAW_PLANE_0_1 && !draw_plane)
                   begin
                     draw_plane <= 1;
-		                draw_x <= reg_vr[reg_ir[11:8]][6:0];
+                        draw_x <= reg_vr[reg_ir[11:8]][6:0];
                     draw_y <= reg_vr[reg_ir[7:4]][5:0];
                     draw_i <= 0;
                     state <= CPU_DRAW;

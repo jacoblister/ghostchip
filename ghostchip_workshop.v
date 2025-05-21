@@ -47,6 +47,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   
   wire [15:0] rom_addr;
   wire [7:0] rom_dout;
+  wire rom_dready;
 
   reg [7:0] mem [0:4095];
   initial begin
@@ -65,14 +66,15 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
   $readmemh("garden.hex", mem);
   $readmemh("expedition.hex", mem);
   $readmemh("garlicscape.hex", mem);
-  $readmemh("superneatboy.hex", mem);
+//  $readmemh("superneatboy.hex", mem);
   $readmemh("sound.hex", mem);
   end
   
   rom rom(
     .clk(clk),
     .addr(rom_addr[13:0]),
-    .dout(rom_dout)
+    .dout(rom_dout),
+    .dready(rom_dready)
   );
   
   wire [15:0] ram_addr;
@@ -117,6 +119,7 @@ module ghostchip_workshop(clk, reset, hsync, vsync,
     .keypad_matrix(keypad_matrix),
     .rom_addr(rom_addr),
     .rom_dout(rom_dout),
+    .rom_dready(rom_dready),
     .ram_addr(ram_addr),
     .ram_din(ram_din),
     .ram_dout(ram_dout),

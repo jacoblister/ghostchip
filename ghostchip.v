@@ -14,6 +14,12 @@ module ghostchip (
     output video_dc,
     output video_sclk,
     output video_mosi,
+
+    output flash_cs,
+    output flash_clk,
+    output flash_mosi,
+    input flash_miso,
+    
     
     input button,
     output speaker,
@@ -88,10 +94,16 @@ module ghostchip (
     
   wire [15:0] rom_addr;
   wire [7:0] rom_dout;
-  rom rom(
+  wire rom_dready;
+  romflash rom(
     .clk(clk),
+    .flash_cs(flash_cs),
+    .flash_clk(flash_clk),
+    .flash_mosi(flash_mosi),
+    .flash_miso(flash_miso),
     .addr(rom_addr),
-    .dout(rom_dout)
+    .dout(rom_dout),
+    .dready(rom_dready)
   );
   
   wire [15:0] ram_addr;
@@ -139,6 +151,7 @@ module ghostchip (
     .ram_addr(ram_addr[13:0]),
     .ram_din(ram_din),
     .ram_dout(ram_dout),
+    .rom_dready(rom_dready),
     .ram_we(ram_we),
     .vram_hpos(vram_hpos),
     .vram_vpos(vram_vpos),

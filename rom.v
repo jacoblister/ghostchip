@@ -1,14 +1,19 @@
 module rom(
   input  clk,        
   input  [13:0] addr,    
-  output reg [7:0] dout
+  output reg [7:0] dout,
+  output dready
   );
   
   reg [7:0] mem [0:16383];
+  reg [13:0] addr_loaded = 14'h2FFF;
   
   always @(posedge clk) begin
+    addr_loaded <= addr;
     dout <= mem[addr];
   end
+  
+  assign dready = addr_loaded == addr;
 
   initial begin
     parameter MEM_INIT_FILE 
@@ -21,12 +26,12 @@ module rom(
 //      = "pong.hex";
 //      = "snake.hex";
 //      = "blinky.hex";
-      = "down8.hex";
+//      = "down8.hex";
 //      = "rockto.hex";
 //      = "chipcross.hex";
 //      = "squad.hex";
 //      = "dvn8.hex";
-//      = "octopaint.hex";
+      = "octopaint.hex";
 //      = "garden.hex";
 //      = "expedition.hex";
 //      = "garlicscape.hex";
