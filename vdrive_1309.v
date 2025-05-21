@@ -69,9 +69,9 @@ module vdrive (
         (vram_pixel == 3);
     
     assign mosi = drv_state == DRV_CMD ? data[counter] : pixelValue;
-    assign sclk = (drv_state == DRV_CMD) || (drv_state == DRV_DATA) ? !divclk : 0;
+    assign sclk = (drv_state == DRV_CMD) || (drv_state == DRV_DATA) ? divclk : 0;
     
-    always @ (posedge divclk) 
+    always @ (negedge divclk) 
     begin
         if (drv_state == DRV_IDLE)
             case (cmd_state)
